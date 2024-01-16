@@ -1,0 +1,14 @@
+<launch>
+    <node name="joystick_mapper_arduino"    pkg="agro_rover"        type="joystick_mapper_arduino.py"   output="screen"/>
+    <node name="arduino_publisher"          pkg="agro_rover"        type="arduino_publisher.py"         output="screen"/>
+    <node name="serial_node"                pkg="rosserial_python"  type="serial_node.py"               output="screen">
+        <param name="port"  value="/dev/ttyUSB0"/>
+        <param name="baud"  value="57600"/>
+    </node>
+    <node name="usb_cam"                    pkg="usb_cam"           type="usb_cam_node"                 output="screen">
+        <param name="video_device"  value="/dev/video0" />
+        <param name="image_width"   value="640" />
+        <param name="image_height"  value="480" />
+        <param name="pixel_format"  value="mjpeg" />
+    <node>
+</launch>
