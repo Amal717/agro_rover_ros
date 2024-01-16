@@ -82,7 +82,7 @@ def joystick_callback(msg):
 
 def main():
     global prev_values, button_pub, axis_pub
-    rospy.init_node('joystick_publisher')
+    rospy.init_node('joystick_mapper_arduino')
 
     # Create publishers for button and axis values
     button_pub = rospy.Publisher('button_values', Int32MultiArray, queue_size=10)
