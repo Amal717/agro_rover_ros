@@ -2,7 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32MultiArray
 import RPi.GPIO as GPIO
 import time
 
@@ -57,13 +57,13 @@ class Rover:
 
     def move_left(self, angular_velocity):
         x_left = angular_velocity / 2
-        self.left_motor.move_forward(50 - x_left)
+        self.left_motor.move_forward(100 - x_left)
         self.right_motor.move_forward(50 + x_left)
 
     def move_right(self, angular_velocity):
         x_right = angular_velocity / 2
         self.left_motor.move_forward(50 + x_right)
-        self.right_motor.move_forward(50 - x_right)
+        self.right_motor.move_forward(100 - x_right)
 
     def stop(self):
         self.left_motor.stop()
@@ -84,41 +84,40 @@ class RaspySubscriber:
         )
 
         # Subscribe to the 'joystick_twist' topic with the twist_callback as the callback function
-        rospy.Subscriber('joystick_twist', Twist, self.twist_callback)
+        rospy.Subscriber('axis_values', Int32MultiArray, self.joystick_values_callback)
 
         # Enter the ROS event loop and wait for callbacks
         rospy.spin()
 
-    def twist_callback(self, msg):
-        # Map the linear and angular velocities from the joystick to a range of 0 to 100
-        linear_velocity = map_value(msg.linear.x, -1.0, 1.0, 0, 100)
-        angular_velocity = map_value(msg.angular.z, -1.0, 1.0, 0, 100)
+    def joystick_values_callback(self, msg):
+        if len(msg.data) >= 4:
+            # Extract x_axis_value and y_axis_value from the received Int32MultiArray
+            x_axis_value = msg.data[0]
+            y_axis_value = msg.data[3]
 
-        # Control rover movement based on the mapped velocities
-        if linear_velocity > 50:
-            # If linear velocity is greater than 50, move forward with a speed mapped from 51 to 100
-            forward_speed = map_value(linear_velocity, 51, 100, 0, 100)
-            self.rover.move_forward(forward_speed)
-        elif linear_velocity < 50:
-            # If linear velocity is less than 50, move backward with a speed mapped from 0 to 49
-            backward_speed = map_value(linear_velocity, 0, 49, 0, 100)
-            self.rover.move_backward(backward_speed)
-        else:
-            # If linear velocity is exactly 50, stop moving
-            self.rover.stop()
+            # Map the linear and angular velocities from the joystick values to a range of 0 to 100
+            linear_velocity = map_value(x_axis_value, -127, 127, 0, 100)
+            angular_velocity = map_value(y_axis_value, -127, 127, 0, 100)
 
-        if angular_velocity < 50:
-            # If angular velocity is less than 50, turn left with a speed mapped from 0 to 49
-            left_turn_speed = map_value(angular_velocity, 0, 49, 0, 100)
-            self.rover.move_left(left_turn_speed)
-        elif angular_velocity > 50:
-            # If angular velocity is greater than 50, turn right with a speed mapped from 51 to 100
-            right_turn_speed = map_value(angular_velocity, 51, 100, 0, 100)
-            self.rover.move_right(right_turn_speed)
-        else:
-            # If angular velocity is exactly 50, stop turning
-            self.rover.stop()
+            # Control rover movement based on the mapped velocities
+            if linear_velocity > 50:
+                forward_speed = map_value(linear_velocity, 51, 100, 0, 100)
+                self.rover.move_forward(forward_speed)
+            elif linear_velocity < 50:
+                backward_speed = map_value(linear_velocity, 0, 49, 0, 100)
+                self.rover.move_backward(backward_speed)
+            else:
+                self.rover.stop()
+
+            if angular_velocity < 50:
+                left_turn_speed = map_value(angular_velocity, 0, 49, 0, 100)
+                self.rover.move_left(left_turn_speed)
+            elif angular_velocity > 50:
+                right_turn_speed = map_value(angular_velocity, 51, 100, 0, 100)
+                self.rover.move_right(right_turn_speed)
+            else:
+                self.rover.stop()
 
 if __name__ == '__main__':
-    # Create an instance of the ArduinoPublisher class when the script is run
-    raspy_publisher = RaspySubscriber()
+    # Create an instance of the RaspySubscriber class when the script is run
+    raspy_subscriber = RaspySubscriber()
