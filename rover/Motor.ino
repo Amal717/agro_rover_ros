@@ -1,117 +1,103 @@
-void initialize_motor(){
+#define IN1 4
+#define IN2 5
+#define ENA 6
+
+#define IN3 8
+#define IN4 9
+#define ENB 10
+
+int speedA;
+int speedB;
+
+void initialize_motor() {
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(ENA, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
   pinMode(ENB, OUTPUT);
-  
 }
-void speed(){
+
+void speed() {
   analogWrite(ENA, speedA);
   analogWrite(ENB, speedB);
 }
 
-void forward_speed(){
-  speedA = map(Yaxis, mid_y, max_y, 0, 255);
-  speedB = map(Yaxis, mid_y, max_y, 0, 255);
-}
-
-void move_forward(){
-  //Move motor A forward
+void move_forward() {
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
-
-  //Move motor B forward
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  
 }
 
-void backward_speed(){
-  speedA = map(Yaxis, mid_y, min_y, 0, 255);
-  speedB = map(Yaxis, mid_y, min_y, 0, 255);
-}
-
-void move_backward(){
-  //Move motor B backward
+void move_backward() {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
-
-  //Move motor B backward
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-
-  
 }
 
-void move_left(){
-  move_forward(); 
-  int x_left = map(Xaxis, min_x, mid_x, 0, 127);
-  speedA = 128 - x_left;
-  speedB = 128 + x_left;
-  if(speedA < 0) speedA = 0;
-  if(speedB > 255) speedB = 0;
+void move_left() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4,HIGH);
 }
 
 void move_right(){
-  move_forward();
-  int x_right = map(Xaxis, mid_x, max_x, 0, 127);
-  speedA = 128 + x_right;
-  speedB = 128 - x_right;
-
-  if(speedA > 255) speedA = 255;
-  if(speedB < 0) speedB = 0;
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4,LOW);
 }
 
-void stop_rover(){
-  //Move motor A forward
+void stop_rover() {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
-
-  //Move motor B forward
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
-
   speedA = 0;
   speedB = 0;
 }
 
-void keep_min_speed(){
-  if(speedA < min_speed) speedA = 0;
-  if(speedB < min_speed) speedB = 0;
-}
-
-void control_rover(){
-  if(Yaxis > mid_y){
+void control_rover(int Xaxis, int Yaxis) {
+  if (Yaxis > 127) {
+    // Move forward
     move_forward();
-    forward_speed();
-    keep_min_speed();
+    speedA = map(Yaxis, 127, 255, 0, 255);
+    speedB = map(Yaxis, 127, 255, 0, 255);
+    // Apply speed
     speed();
-  }
-  else if(Yaxis < mid_y){
+  } else if (Yaxis < 127) {
+    // Move backward
     move_backward();
-    backward_speed();
-    keep_min_speed();
+    speedA = map(Yaxis, 127, 0, 0, 255);
+    speedB = map(Yaxis, 127, 0, 0, 255);
+    // Apply speed
     speed();
   }
-  else{
+   else if(Yaxis == 127){
+    // Stop
     stop_rover();
+  }
+  if(Xaxis > 127){
+    speedA = map(Xaxis, 127, 255, 0, 255);
+    speedB = map(Xaxis, 127, 255, 0, 255);
+    move_right();
+    // Apply speed
     speed();
+  }
+  else if(Xaxis < 127){
+    speedA = map(Xaxis, 127, 0, 0, 255);
+    speedB = map(Xaxis, 127, 0, 0, 255);
+    move_left();
+    // Apply speed
+    speed();
+  }
+  else if(Xaxis == 127){
+    stop_rover();
   }
 
-  if(Xaxis < mid_x){
-    move_left();
-    keep_min_speed();
-    speed();
-  }
-  else if(Xaxis > mid_x){
-    move_right();
-    keep_min_speed();
-    speed();
-  }
-  else{
-    stop_rover();
-    speed();
-  }
+  
 }
+
