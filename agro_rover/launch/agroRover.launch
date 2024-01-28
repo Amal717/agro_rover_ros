@@ -10,5 +10,5 @@
         <param name="image_width"   value="640" />
         <param name="image_height"  value="480" />
         <param name="pixel_format"  value="mjpeg" />
-    <node>
+    </node>
 </launch>
