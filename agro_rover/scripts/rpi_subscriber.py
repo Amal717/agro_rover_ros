@@ -83,7 +83,7 @@ class JoystickController:
 
     def axis_callback(self, msg):
         if len(msg.data) >= 2:
-            x_axis_value = msg.data[0]
+            x_axis_value = msg.data[2]
             y_axis_value = msg.data[1]
             linear_velocity = map_value(y_axis_value, 0, 100, -100, 100)
             angular_velocity = map_value(x_axis_value, 0, 100, -100, 100)
