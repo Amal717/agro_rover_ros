@@ -92,7 +92,7 @@ class JoystickController:
     def axis_callback(self, msg):
         if len(msg.data) >= 2:
             # Extract x_axis_value and y_axis_value from the received Int32MultiArray
-            x_axis_value = msg.data[0]
+            x_axis_value = msg.data[2]
             y_axis_value = msg.data[1]
 
             # Map the joystick values to a range of -100 to 100
