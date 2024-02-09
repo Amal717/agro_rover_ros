@@ -73,7 +73,7 @@ class Rover:
 
 class JoystickController:
     def __init__(self):
-        rospy.init_node('joystick_controller')
+        rospy.init_node('joystick_publisher')
         self.rover = Rover(
             motorA_pins=(17, 18, 27),
             motorB_pins=(22, 23, 24)
